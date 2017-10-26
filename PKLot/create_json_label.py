@@ -5,17 +5,9 @@ Simple script for preprosessing PKLot label data (.xml)
 import os
 import json
 import glob
-import xmltodict
+
 import PKLot.config
 import PKLot.utilities
-
-
-def get_label_data(xml_path):
-
-    with open(xml_path) as xml:
-        xml_dict = xmltodict.parse(xml.read())
-
-    return xml_dict
 
 
 def get_PKLot_label_json(parking_lots_data, save_path, root_filename):
@@ -28,7 +20,8 @@ def get_PKLot_label_json(parking_lots_data, save_path, root_filename):
 
         if "@occupied" in parking_lot_data:
 
-            x, y, width, height = PKLot.utilities.get_bouding_box(parking_lot_data["contour"]["point"])
+            coordinates_list = [list(map(int, p.values())) for p in parking_lot_data["contour"]["point"]]
+            x, y, width, height = PKLot.utilities.get_bounding_box(coordinates_list)
             annotation = {
                 "class": classes[parking_lot_data["@occupied"]],
                 "height": height,
@@ -51,32 +44,29 @@ def get_PKLot_label_json(parking_lots_data, save_path, root_filename):
 
 def main():
 
-    data_dir = PKLot.config.preprocess_config["data_dir"]
+    dataset_dir = PKLot.config.preprocess_config["data_dir"]
+    label_dir = os.path.join(dataset_dir, "label", "*.xml")
 
-    label_data_path = os.path.join(data_dir, "label", "*.xml")
-    # data_path = os.path.join(data_dir, "data")
-
-    output_dir = os.path.join(data_dir, "format")
+    output_dir = os.path.join(dataset_dir, "format")
     output_label_dir = os.path.join(output_dir, "label_json")
-    # output_data_dir = os.path.join(output_dir, "data")
 
-    label_paths = glob.glob(label_data_path)
+    label_paths = glob.glob(label_dir)
+
+    if not os.path.exists(output_dir):
+
+        os.mkdir(output_dir)
+
+    if not os.path.exists(output_label_dir):
+
+        os.mkdir(output_label_dir)
 
     for path in label_paths:
 
-        parking_lots_data = get_label_data(path)
+        parking_lots_data = PKLot.utilities.get_label_data(path)
         save_path = os.path.dirname(path)
         root_filename = os.path.splitext(os.path.basename(path))[0]
 
         label_json = get_PKLot_label_json(parking_lots_data, save_path, root_filename)
-
-        if not os.path.exists(output_dir):
-
-            os.mkdir(output_dir)
-
-        if not os.path.exists(output_label_dir):
-
-            os.mkdir(output_label_dir)
 
         output_path = os.path.join(output_label_dir, root_filename + ".json")
 

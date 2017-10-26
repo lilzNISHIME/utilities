@@ -9,7 +9,7 @@ def main():
 
     path = config.preprocess_config["visualize_data"]
 
-    target_json = os.path.join(path, "format/label_json/2012-09-12_06_05_16.json")
+    target_json = os.path.join(path, "label/2012-09-12_06_05_16.json")
     target_img = os.path.join(path, "data/2012-09-12_06_05_16.jpg")
 
     image = cv2.imread(target_img)
@@ -36,7 +36,7 @@ def main():
         plotting_points = [np.array(points).reshape((-1,1,2))]
         image = cv2.polylines(image, plotting_points, True, (0, 255, 255))
 
-    cv2.imwrite("sample.jpg", image)
+    cv2.imwrite("sample_cropped.jpg", image)
 
 
 if __name__ == "__main__":
