@@ -99,3 +99,9 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# forme
+config.py
+!/config.py
+.idea
+*.jpg
